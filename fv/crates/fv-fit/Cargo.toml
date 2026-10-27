@@ -1,0 +1,22 @@
+[package]
+name = "fv-fit"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+fv-common = { path = "../fv-common" }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
+rayon = "1"
+clap = { version = "4", features = ["derive"] }
+
+[dev-dependencies]
+criterion = { version = "0.7", default-features = false, features = ["cargo_bench_support"] }
+
+[[bench]]
+name = "fit_core"
+harness = false
+
+[[bin]]
+name = "fv-fit"
+path = "src/main.rs"

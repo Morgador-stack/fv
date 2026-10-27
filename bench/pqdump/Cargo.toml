@@ -1,0 +1,10 @@
+[package]
+name = "pqdump"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+parquet = { version = "53", default-features = false, features = ["base64", "snap"] }
+
+[profile.release]
+debug = false

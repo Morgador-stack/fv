@@ -1,0 +1,26 @@
+[package]
+name = "fv-gpu"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+fv-fit = { path = "../fv-fit" }
+fv-common = { path = "../fv-common" }
+image = "0.25"
+wgpu = "26"
+pollster = "0.4"
+bytemuck = { version = "1", features = ["derive"] }
+clap = { version = "4", features = ["derive"] }
+
+[dev-dependencies]
+criterion = { version = "0.7", default-features = false, features = ["cargo_bench_support"] }
+
+[[example]]
+name = "probe"
+
+[[example]]
+name = "bench_gpu"
+
+[[bin]]
+name = "fvfit-gpu"

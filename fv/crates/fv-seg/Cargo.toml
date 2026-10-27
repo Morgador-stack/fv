@@ -1,0 +1,26 @@
+[package]
+name = "fv-seg"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+# pyke ort with load-dynamic: no build-time binary download/link; the shared
+# library is located at runtime via ORT_DYLIB_PATH. rc.10 targets ORT API v22
+# (onnxruntime 1.22.x) — the dylib version must match.
+ort = { version = "=2.0.0-rc.10", features = ["load-dynamic"] }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "bmp"] }
+fv-common = { path = "../fv-common" }
+fv-fit = { path = "../fv-fit" }
+fv-gpu = { path = "../fv-gpu" }
+clap = { version = "4", features = ["derive"] }
+
+[[example]]
+name = "seg_probe"
+
+[[example]]
+name = "plan_probe"
+
+[[bin]]
+name = "fvseg"
+path = "src/bin/fvseg.rs"

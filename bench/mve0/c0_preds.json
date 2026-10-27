@@ -1,0 +1,50 @@
+{
+ "community_vinyls_1_16": {
+  "thresh_bias": -16,
+  "smooth_rounds": 1,
+  "band_radius": 5,
+  "edge_frac": 0.25,
+  "subject_gain": 0.45,
+  "subject_floor": 0.3
+ },
+ "flames_40": {
+  "thresh_bias": 0,
+  "smooth_rounds": 1,
+  "band_radius": 5,
+  "edge_frac": 0.25,
+  "subject_gain": 0.45,
+  "subject_floor": 0.3
+ },
+ "nature_20": {
+  "thresh_bias": 0,
+  "smooth_rounds": 1,
+  "band_radius": 3,
+  "edge_frac": 0.25,
+  "subject_gain": 0.45,
+  "subject_floor": 0.3
+ },
+ "primitives_29": {
+  "thresh_bias": 0,
+  "smooth_rounds": 1,
+  "band_radius": 3,
+  "edge_frac": 0.25,
+  "subject_gain": 0.45,
+  "subject_floor": 0.3
+ },
+ "racing_icons_30": {
+  "thresh_bias": 0,
+  "smooth_rounds": 2,
+  "band_radius": 5,
+  "edge_frac": 0.25,
+  "subject_gain": 0.45,
+  "subject_floor": 0.3
+ },
+ "tribal_17": {
+  "thresh_bias": 0,
+  "smooth_rounds": 1,
+  "band_radius": 3,
+  "edge_frac": 0.25,
+  "subject_gain": 0.45,
+  "subject_floor": 0.3
+ }
+}

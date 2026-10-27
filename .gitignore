@@ -1,0 +1,26 @@
+# 参考仓库（第三方，不入库）
+refs/
+# 大体积依赖与构建产物（模型/dll/Qt/OpenCV——见 README 获取方式）
+deps/
+build/
+# 交叉发布包（含二进制，Release 附件另行分发）
+bundle-5090d/
+# Rust 构建产物
+fv/target/
+fv/target-*/
+# 本地工具扫描产物
+.mimosa/
+**/.mimosa/
+# 日志
+*.log
+# bench 可再生产物（语料见 bench/README）
+bench/results/
+bench/mve0/t_*
+bench/mve0_dut/
+bench/vis_*.png
+bench/pqdump/target/
+# vinylizer 构建脚本（属于 refs 内项目的复现实验）
+*.bat
+# OS
+Thumbs.db
+.DS_Store
