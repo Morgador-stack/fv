@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/fv-common", "crates/fv-fit", "crates/fv-inject", "crates/fv-gpu", "crates/fv-seg"]
+members = ["crates/fv-common", "crates/fv-fit", "crates/fv-bench", "crates/fv-inject", "crates/fv-gpu", "crates/fv-seg"]
 
 [workspace.package]
 edition = "2024"
