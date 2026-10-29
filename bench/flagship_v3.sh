@@ -2,10 +2,10 @@
 # 旗舰链 v3：B1 结构导引采样版交替链（s300→refine→r1000→refine→r2000→refine→3000 auto-soft）。
 # 独占 GPU（串行纪律）。
 set -eu
-FV=/d/WorkSpace/ZCWorkspace/forza-vinyl
+FV="$(cd "$(dirname "$0")/.." && pwd)"
 EXE=$FV/fv/target-b1/release
 IMG=$FV/refs/forza-painter-fh6/assets/imgs/ayylmao.png
-T=/c/Users/Lenovo/AppData/Local/Temp
+T=${TMPDIR:-/tmp}
 REFINE="--diff-tau0 32 --diff-lr-geo 0.2 --diff-lr-col 0.8"
 LOG=$T/flagship_v3.log
 
