@@ -47,8 +47,16 @@ pub fn prepare(s: &ShapeJson, lay: &Layout, offset: CanvasOffset) -> Result<Laye
         return Err(format!("type {} 的 data 长度 {} < 4", s.kind, s.data.len()));
     }
     let angle = if s.data.len() >= 5 { s.data[4] } else { 0.0 };
-    // is_finite 闸（写内存前最后一道）：JSON 的 1e999 会经 f64→f32 变 inf，
-    // inf/NaN 坐标写进游戏内存 = 崩游戏。CODE_REVIEW §E。
+    // is_finite 闸（写内存前最后一道，CODE_REVIEW §E.5）：JSON 里的 1e40 经 f32 反序列化
+    // 即变 inf，inf/NaN 坐标写进游戏内存 = 崩游戏。报错指明 data[j] 位置。
+    for (j, v) in s.data.iter().enumerate() {
+        if !v.is_finite() {
+            return Err(format!(
+                "type {} 的 data[{j}] = {v} 非有限（inf/NaN），拒绝写入游戏内存",
+                s.kind
+            ));
+        }
+    }
     let fields = LayerFields {
         pos: [s.data[0] - offset.dx, -(s.data[1] - offset.dy)],
         scale: [s.data[2] / divisor, s.data[3] / divisor],
@@ -56,13 +64,14 @@ pub fn prepare(s: &ShapeJson, lay: &Layout, offset: CanvasOffset) -> Result<Laye
         color: s.color,
         shape_id,
     };
+    // 换算值复核：data 全有限时，除数/offset 异常或 NaN 角度的 rem_euclid 仍可能产出非有限值
     let all_finite = fields.pos.iter().chain(fields.scale.iter())
         .all(|v| v.is_finite())
         && fields.rotation.is_finite();
     if !all_finite {
         return Err(format!(
-            "type {} 含非有限坐标/缩放（inf/NaN）：{:?}",
-            s.kind, fields.pos
+            "type {} 换算后含非有限坐标/缩放/旋转（inf/NaN）：pos={:?} scale={:?} rotation={}",
+            s.kind, fields.pos, fields.scale, fields.rotation
         ));
     }
     Ok(fields)
@@ -128,5 +137,19 @@ mod tests {
             color: [0; 4],
         };
         assert!(prepare(&short, &lay, CanvasOffset::NONE).is_err());
+    }
+
+    #[test]
+    fn rejects_non_finite_json_1e40() {
+        // pre-write 闸（CODE_REVIEW §E.5）：JSON "1e40" 经 serde f32 反序列化 = inf。
+        // 即使上游 loader（read_design_bytes）被绕过，写内存前也必须拦下，且指明 data[j] 位置。
+        let lay = Layout::default();
+        let s: ShapeJson = serde_json::from_str(
+            r#"{"type":16,"data":[1e40,200.0,63.0,126.0,30.0],"color":[10,20,30,255]}"#,
+        )
+        .unwrap();
+        assert!(s.data[0].is_infinite(), "1e40 经 f32 反序列化应为 inf");
+        let err = prepare(&s, &lay, CanvasOffset::NONE).unwrap_err();
+        assert!(err.contains("data[0]"), "{err}");
     }
 }
