@@ -66,32 +66,9 @@ pub struct Args {
 
 /// 解析背景色：`auto` → 不透明像素（a≥128）逐通道均值四舍五入（无不透明像素则黑）；
 /// 否则解析 6 位十六进制 RRGGBB（大小写均可）。
+/// 语义真源 = `fv_common::bg::resolve`（薄壳，签名/行为/错误文案逐位不变）。
 pub fn resolve_bg(img: &image::RgbaImage, spec: &str) -> Result<[u8; 3], String> {
-    if spec.eq_ignore_ascii_case("auto") {
-        let (mut sum, mut cnt) = ([0u64; 3], 0u64);
-        for px in img.pixels() {
-            if px.0[3] >= 128 {
-                for (s, v) in sum.iter_mut().zip(px.0.iter().take(3)) {
-                    *s += *v as u64;
-                }
-                cnt += 1;
-            }
-        }
-        if cnt == 0 {
-            return Ok([0, 0, 0]);
-        }
-        let mut out = [0u8; 3];
-        for ch in 0..3 {
-            out[ch] = ((sum[ch] + cnt / 2) / cnt).clamp(0, 255) as u8;
-        }
-        return Ok(out);
-    }
-    let spec = spec.trim_start_matches('#');
-    if spec.len() != 6 || !spec.chars().all(|c| c.is_ascii_hexdigit()) {
-        return Err(format!("非法背景色 \"{spec}\"：应为 auto 或 RRGGBB"));
-    }
-    let v = u32::from_str_radix(spec, 16).map_err(|e| e.to_string())?;
-    Ok([(v >> 16) as u8, (v >> 8) as u8, v as u8])
+    fv_common::bg::resolve(img, spec)
 }
 
 /// checkpoint 归一化：去重、升序、丢弃 0 与 >layers。
@@ -138,6 +115,16 @@ pub fn shapes_from_design(
                     path.display(),
                     s.data.len()
                 ));
+            }
+            // is_finite 闸（CODE_REVIEW §E.5）：JSON "1e40" 经 f32 反序列化即变 inf，
+            // 非有限坐标会原样穿透引擎（渲染为空、逐位保留）最后进入注入器。
+            for (j, v) in s.data.iter().enumerate() {
+                if !v.is_finite() {
+                    return Err(format!(
+                        "resume: {} shapes[{i}].data[{j}] = {v} 非有限（inf/NaN）",
+                        path.display()
+                    ));
+                }
             }
             let [r, g, b, _a] = s.color;
             Ok(fv_common::shape::Shape::ellipse(
@@ -326,5 +313,18 @@ mod tests {
         let d = design(vec![sj(16, vec![1.0; 5]), sj(16, vec![1.0; 5])]);
         let err = shapes_from_design(&d, 1, std::path::Path::new("x.json")).unwrap_err();
         assert!(err.contains("超过 --layers=1"), "{err}");
+    }
+
+    #[test]
+    fn resume_json_rejects_non_finite_data() {
+        // intake 闸（CODE_REVIEW §E.5）：JSON "1e40" 经 f32 反序列化 = inf，
+        // 必须在此拦下并指明 shapes[i].data[j] 位置。
+        let d = design(vec![
+            sj(16, vec![10.0, 20.0, 3.0, 4.0, 0.0]),
+            sj(16, vec![1.0, 2.0, 1e40_f64 as f32, 4.0, 0.0]),
+        ]);
+        let err = shapes_from_design(&d, 10, std::path::Path::new("x.json")).unwrap_err();
+        assert!(err.contains("shapes[1].data[2]"), "{err}");
+        assert!(err.contains("非有限"), "{err}");
     }
 }
