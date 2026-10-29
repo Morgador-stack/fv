@@ -1,5 +1,5 @@
 //! 重放引擎现场：加载 dump 的 (target, canvas, 候选)，GPU 与 CPU 各评一次。
-//! 前置：先用 fvfit-gpu 跑出 C:/Users/Lenovo/AppData/Local/Temp/fv_dump_*.bin
+//! 前置：先用 fvfit-gpu 跑出系统临时目录（std::env::temp_dir()）下的 fv_dump_*.bin
 //!（engine.rs 软通道调试 dump；无 dump 时本测试跳过）。
 
 use fv_fit::candidate::Rng;
@@ -10,14 +10,14 @@ use fv_gpu::GpuEvaluator;
 
 #[test]
 fn replay_engine_divergence() {
-    let dir = "C:/Users/Lenovo/AppData/Local/Temp";
-    let Ok(target) = std::fs::read(format!("{dir}/fv_dump_target.bin")) else {
+    let dir = std::env::temp_dir();
+    let Ok(target) = std::fs::read(dir.join("fv_dump_target.bin")) else {
         eprintln!("跳过：无 dump 文件");
         return;
     };
-    let canvas = std::fs::read(format!("{dir}/fv_dump_canvas.bin")).unwrap();
-    let cand_txt = std::fs::read_to_string(format!("{dir}/fv_dump_cand.txt")).unwrap();
-    let dims = std::fs::read_to_string(format!("{dir}/fv_dump_dims.txt")).unwrap();
+    let canvas = std::fs::read(dir.join("fv_dump_canvas.bin")).unwrap();
+    let cand_txt = std::fs::read_to_string(dir.join("fv_dump_cand.txt")).unwrap();
+    let dims = std::fs::read_to_string(dir.join("fv_dump_dims.txt")).unwrap();
     let (w, h) = dims.split_once(',').unwrap();
     let (w, h) = (w.parse::<u32>().unwrap(), h.parse::<u32>().unwrap());
     let v: Vec<f32> = cand_txt.split(',').map(|s| s.parse().unwrap()).collect();
