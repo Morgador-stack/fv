@@ -752,9 +752,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "fv-bench"
+version = "0.1.0"
+dependencies = [
+ "fv-common",
+ "fv-fit",
+ "image",
+]
+
+[[package]]
 name = "fv-common"
 version = "0.1.0"
 dependencies = [
+ "image",
  "serde",
  "serde_json",
 ]
