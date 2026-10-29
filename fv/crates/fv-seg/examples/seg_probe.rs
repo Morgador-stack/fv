@@ -1,17 +1,19 @@
 //! End-to-end probe: image in → matte PNG out, with timings and stats.
 //!
-//! Usage: cargo run --release -p fv-seg --example seg_probe [image] [out.png]
+//! Usage: cargo run --release -p fv-seg --example seg_probe <image> [out.png]
 
 use std::time::Instant;
 
 use fv_seg::Matte;
 
-const DEFAULT_IMAGE: &str = r"D:\WorkSpace\ZCWorkspace\forza-vinyl\refs\forza-painter-fh6\assets\imgs\ayylmao.png";
 const DEFAULT_OUT: &str = "matte.png";
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let image_path = args.get(1).map(String::as_str).unwrap_or(DEFAULT_IMAGE);
+    let Some(image_path) = args.get(1).map(String::as_str) else {
+        eprintln!("usage: cargo run --release -p fv-seg --example seg_probe <image> [out.png]");
+        return;
+    };
     let out_path = args.get(2).map(String::as_str).unwrap_or(DEFAULT_OUT);
 
     let model = fv_seg::default_model_path();
