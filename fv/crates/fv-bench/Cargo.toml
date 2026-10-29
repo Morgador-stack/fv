@@ -1,0 +1,10 @@
+[package]
+name = "fv-bench"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+fv-common = { path = "../fv-common" }
+fv-fit = { path = "../fv-fit" }
+image = { version = "0.25", default-features = false, features = ["png", "jpeg"] }
