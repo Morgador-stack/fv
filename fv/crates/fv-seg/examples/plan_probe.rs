@@ -8,26 +8,34 @@
 //!
 //! Usage:
 //! cargo run --release -p fv-seg --example plan_probe [image] [out_dir]
+//! Both arguments are optional: with no image a synthetic matte is used;
+//! out_dir defaults to the system temp directory.
 
 use std::path::Path;
 
 use fv_seg::Matte;
 
-const DEFAULT_IMAGE: &str =
-    r"D:\WorkSpace\ZCWorkspace\forza-vinyl\refs\forza-painter-fh6\assets\imgs\ayylmao.png";
-const DEFAULT_OUT: &str = r"C:\Users\Lenovo\AppData\Local\Temp\fv_plan_out";
 const TOTAL_BUDGET: usize = 1500;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
-    let image_path = args.get(1).map(String::as_str).unwrap_or(DEFAULT_IMAGE);
-    let out_dir = args.get(2).map(String::as_str).unwrap_or(DEFAULT_OUT);
-    println!("image   : {image_path}");
+    let image_path = args.get(1).map(String::as_str);
+    let out_dir = args
+        .get(2)
+        .map(|s| s.to_string())
+        .unwrap_or_else(|| std::env::temp_dir().join("fv_plan_out").display().to_string());
+    println!("image   : {}", image_path.unwrap_or("<none: synthetic matte>"));
     println!("out dir : {out_dir}");
     println!("budget  : total={TOTAL_BUDGET}");
 
     // ---- matte: real MODNet when possible, synthetic fallback otherwise ----
-    let (matte, source) = load_or_synthesize_matte(image_path);
+    let (matte, source) = match image_path {
+        Some(path) => load_or_synthesize_matte(path),
+        None => (
+            synthetic_matte(320, 240),
+            "synthetic (no image argument given)".to_string(),
+        ),
+    };
     println!("matte   : {source} ({}x{})", matte.width, matte.height);
     let (min, max, mean) = matte.stats();
     println!("matte stats: min={min} max={max} mean={mean:.2}");
@@ -43,7 +51,7 @@ fn main() {
     );
 
     // ---- save ----
-    let out = Path::new(out_dir);
+    let out = Path::new(&out_dir);
     fv_seg::save_masks(&plan, out).unwrap_or_else(|e| panic!("save_masks: {e}"));
     matte
         .save_png(out.join("matte.png"))
