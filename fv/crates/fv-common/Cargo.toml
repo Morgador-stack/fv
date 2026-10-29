@@ -7,3 +7,5 @@ license.workspace = true
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# bg 原语只需 RgbaImage 类型，不启用任何编解码 feature
+image = { version = "0.25", default-features = false }
