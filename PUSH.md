@@ -1,6 +1,6 @@
 # 推送到 GitHub（给用户的操作卡）
 
-仓库已就绪：`forza-vinyl/` 内 git 仓库，2 个 commit（源码+文档+基准），打包 359KB。
+仓库已就绪：`forza-vinyl/` 内 git 仓库，15 个 commit（源码+文档+基准），打包 fv.bundle 约 2.5MB。
 网络现状（2026-10-27 21:00 实测）：**GitHub 直连可达**（github.com / api.github.com 均 200）。
 缺的只是你的账号凭据。三条路径任选：
 
@@ -23,7 +23,7 @@ git remote add origin git@github.com:<用户名>/<仓库名>.git
 git push -u origin main
 ```
 
-## 路径 C：离线搬运（fv.bundle，359KB）
+## 路径 C：离线搬运（fv.bundle，约 2.5MB）
 
 U 盘/网盘带走 `fv.bundle`，在任意有网机器：
 
