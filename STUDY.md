@@ -405,3 +405,21 @@ Top 发现（详见文档 §A-G，20 条 action 按 S/M/L 排序）：
 **复现**：`fvfit-gpu <img> --resume e{n}.json --layers 3000 --polish {n} --samples 1M --bg auto` 循环（e0=fv3_full）。
 
 **待办**：视觉验收（40dB 的 visdiff）；polish 轮数自适应（增量 <0.1dB 停）；12 图基准上跑 polish 循环验证泛化。
+
+## 16. GitHub 发布闭环（2026-10-29）：api.github.com 通道全量同步完成
+
+**仓库**：https://github.com/Morgador-stack/fv —— 本地 HEAD（0a9f4ed，232 文件）↔ 远端 231 文件逐 blob-SHA 对账一致。
+
+**通道定型**（CQUPT 网络下 github.com:443 push 被 SNI 阻断，api.github.com 可达）：
+1. 首建：`tools/gh_upload.py`（Git Data API：blob→tree→commit→ref，240 文件全量）。
+2. 增量：细粒度 PAT 无 tree/commit/ref 写权限（Git Data 写端点 403）→ 改 **Contents API 逐文件 PUT**（每文件一个 commit），`tools/sync_finish.py` 收官：
+   - 先 GET commits/main + trees?recursive=1 对账（blob SHA 级），只传缺失/内容不同者；
+   - 上传前排除 `.github/workflows/*`（需 PAT 的 **Workflows** 权限，非 Administration——ci.yml 仍缺，待 token 加权后补传或网页端手传）；
+   - AUDIT_REPORT.md 含 PAT 前缀字面量触发 **secret scanning push protection**（422）→ 本地脱敏后上传通过。
+
+**教训两则**：
+- `core.autocrlf=true` 下工作区文件裸读 ≠ HEAD blob（CRLF/LF 转换）——同步必须 `git cat-file blob <sha>` 直读，不能 open 工作区文件（曾致 3 个文件误报"SHA 漂移"被防护拦下）。
+- 系统重装后 harness 的 Bash 工具退化成 cmd.exe（MinGit 不在 PATH，MinGit 亦无 bash.exe）——POSIX 命令一律 `D:\Tools\MinGit\usr\bin\sh.exe -c` 或全路径 git.exe + Python 单行/脚本文件；多行 `python -c` 在 cmd 下不可靠，写成脚本文件跑。
+
+**工具链**：`tools/sync_finish.py`（对账+补传一体，`--dry-run` 预览；token 走 `.token`，已 gitignore）。后续任何"同步到 GitHub"直接重跑该脚本即可。
+
