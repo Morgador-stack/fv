@@ -24,3 +24,6 @@ bench/pqdump/target/
 # OS
 Thumbs.db
 .DS_Store
+
+# 凭据（绝不入库）
+.token
