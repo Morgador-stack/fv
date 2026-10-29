@@ -3,10 +3,10 @@
 # s300(已精修 26.97) → resume 1000 → refine → resume 2000 → refine → resume 3000 +auto-soft → 判定
 # 全程 bg auto / 1M 采样 / opt-res 328。日志 tee 到 flagship_chain.log。
 set -eu
-FV=/d/WorkSpace/ZCWorkspace/forza-vinyl
+FV="$(cd "$(dirname "$0")/.." && pwd)"
 EXE=$FV/fv/target-l/release
 IMG=$FV/refs/forza-painter-fh6/assets/imgs/ayylmao.png
-T=/c/Users/Lenovo/AppData/Local/Temp
+T=${TMPDIR:-/tmp}
 REFINE="--diff-tau0 32 --diff-lr-geo 0.2 --diff-lr-col 0.8"
 
 run() { echo "=== $(date +%H:%M:%S) $*" | tee -a $T/flagship_chain.log; "$@" 2>&1 | tail -2 | tee -a $T/flagship_chain.log; }
